@@ -65,7 +65,7 @@ export default function ClinicDashboard() {
                     // setting up the clinicInfo hash
                     const ipfsInfoHash = res[1]
                     fetch(
-                        process.env.pinata_gateway_url +
+                        process.env.NEXT_PUBLIC_PINATA_GATEWAY_DOMAIN +
                             ipfsInfoHash +
                             "/info.json"
                     ) // generic filename
@@ -91,10 +91,7 @@ export default function ClinicDashboard() {
         <div className="container mx-auto  overflow-x-hidden h-screen">
             <Head>
                 <title>Myriad - Clinic Dashboard</title>
-                <meta
-                    name="description"
-                    content="Myriad - Clinic Dashboard"
-                />
+                <meta name="description" content="Myriad - Clinic Dashboard" />
                 <link rel="icon" href="/logo.svg" />
             </Head>
             <Header />

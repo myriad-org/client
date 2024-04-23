@@ -1,5 +1,6 @@
 import ListFile from "./ListFile"
 import { TabList, Tab } from "web3uikit"
+import { useEffect } from "react"
 
 export default function ListMedicalFiles({
     vaccinationHash,
@@ -7,10 +8,7 @@ export default function ListMedicalFiles({
     accidentHash,
     acuteHash,
 }) {
-    // console.log("vaccination hash : ", vaccinationHash)
-    // console.log("chronic hash : ", chronicHash)
-    // console.log("accident hash : ", accidentHash)
-    // console.log("acute hash : ", acuteHash)
+
     return (
         <div>
             <div className="mt-5">

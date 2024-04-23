@@ -36,7 +36,6 @@ export default function DoctorDashboard() {
         fetchDoctor().catch((e) => console.log("Error in useEffect", e))
     }, [doctorAddress])
 
-
     const initiateGetDoctorDetailsFunction = async () => {
         const getDoctorDetailsOptions = {
             abi: PatientMedicalRecordSystemAbi,
@@ -67,7 +66,7 @@ export default function DoctorDashboard() {
                     // setting up the doctorInfo hash
                     const ipfsInfoHash = res[1]
                     fetch(
-                        process.env.pinata_gateway_url +
+                        process.env.NEXT_PUBLIC_PINATA_GATEWAY_DOMAIN +
                             ipfsInfoHash +
                             "/info.json"
                     ) // generic filename

@@ -41,7 +41,7 @@ export default function DoctorProfile({ doctorInfo }) {
                             </span>
                             :{" "}
                             <a className="badge badge-success ml-3 md:p-2 px-4">
-                                {doctorInfo?.doctorRegistrationId}
+                                {doctorInfo?.registrationId}
                             </a>
                         </div>
                         <div className="mb-1">
@@ -71,7 +71,7 @@ export default function DoctorProfile({ doctorInfo }) {
                                 title="view on etherscan"
                                 target="_blank"
                                 href={
-                                    "https://goerli.etherscan.io/address/" +
+                                    "https://sepolia.etherscan.io/address/" +
                                     doctorInfo?.hospitalAddress
                                 }
                             >

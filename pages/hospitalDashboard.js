@@ -65,7 +65,7 @@ export default function HospitalDashboard() {
                     // setting up the hospitalInfo hash
                     const ipfsInfoHash = res[1]
                     fetch(
-                        process.env.pinata_gateway_url +
+                        process.env.NEXT_PUBLIC_PINATA_GATEWAY_DOMAIN +
                             ipfsInfoHash +
                             "/info.json"
                     ) // generic filename

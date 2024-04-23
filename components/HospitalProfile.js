@@ -42,7 +42,7 @@ export default function HospitalProfile({ hospitalInfo }) {
                             </span>
                             :{" "}
                             <a className="badge badge-warning ml-3 md:p-2 px-4">
-                                {hospitalInfo?.id}
+                                {hospitalInfo?.registrationId}
                             </a>
                         </div>
 

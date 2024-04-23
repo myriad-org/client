@@ -24,16 +24,16 @@ export default function Footer() {
                             </li>
                             <li>
                                 <a
-                                    href="https://github.com/sadityakumar9211/Myriad-hardhat"
+                                    href="https://github.com/myria-org/contracts"
                                     target="_blank"
                                     className="inline-block px-3 py-2 text-gray-500 no-underline hover:text-gray-600"
                                 >
-                                    Hardhat Repository
+                                    Foundry Repository
                                 </a>
                             </li>
                             <li>
                                 <a
-                                    href="https://github.com/sadityakumar9211/Myriad-nextjs"
+                                    href="https://github.com/myriad-org/client"
                                     target="_blank"
                                     className="inline-block px-3 py-2 text-gray-500 no-underline hover:text-gray-600"
                                 >
@@ -42,43 +42,43 @@ export default function Footer() {
                             </li>
                             <li>
                                 <a
-                                    href="https://github.com/sadityakumar9211/Myriad-thegraph"
+                                    href={process.env.DAOURI}
                                     target="_blank"
                                     className="inline-block px-3 py-2 text-gray-500 no-underline hover:text-gray-600"
                                 >
-                                    The Graph Repository
+                                    Governance
                                 </a>
                             </li>
                         </ul>
                         <ul className="flex flex-col w-full p-0 font-medium text-left text-gray-700 list-none">
                             <li className="inline-block px-3 py-2 mt-5 font-bold tracking-wide text-gray-800 uppercase md:mt-0">
-                                Hardhat Tools
+                                Dev Tools
                             </li>
                             <li>
                                 <a
-                                    href="https://hardhat.org/"
+                                    href="https://book.getfoundry.sh"
                                     target="_blank"
                                     className="inline-block px-3 py-2 text-gray-500 no-underline hover:text-gray-600"
                                 >
-                                    Hardhat
+                                    Foundry
                                 </a>
                             </li>
                             <li>
                                 <a
-                                    href="https://thegraph.com/en/"
+                                    href="https://aragon.org"
                                     target="_blank"
                                     className="inline-block px-3 py-2 text-gray-500 no-underline hover:text-gray-600"
                                 >
-                                    The Graph
+                                    Aragon
                                 </a>
                             </li>
                             <li>
                                 <a
-                                    href="https://moralis.io/"
+                                    href="https://nextjs.org/"
                                     target="_blank"
                                     className="inline-block px-3 py-2 text-gray-500 no-underline hover:text-gray-600"
                                 >
-                                    Moralis Open Source Tools
+                                    Next.js
                                 </a>
                             </li>
                         </ul>

@@ -7,6 +7,7 @@ const fetcher = (...args) => fetch(...args).then((res) => res.json())
 
 export default function ListFile({ fileMetadataHash, customText, haveFiles }) {
     //Just fetch all the data from the subgraph and display it in form of cards
+    console.log(fileMetadataHash)
 
     // console.log("I am a 0 th index", fileMetadataHash[0])
     if (!haveFiles) {

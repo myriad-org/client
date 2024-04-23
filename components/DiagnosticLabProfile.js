@@ -23,7 +23,7 @@ export default function DiagnosticLabProfile({
                         </div>
                         <div className="mb-1">
                             <span className="font-sans md:text-xl font-medium hover:underline">
-                                DiagnosticLab Account Address
+                                Lab Account Address
                             </span>
                             :{" "}
                             <a
@@ -40,11 +40,11 @@ export default function DiagnosticLabProfile({
                         </div>
                         <div className="mb-1">
                             <span className="font-sans md:text-xl font-medium hover:underline">
-                                DiagnosticLab Registration Id
+                                Diagnostic Lab Registration Id
                             </span>
                             :{" "}
                             <a className="badge badge-warning ml-3 md:p-2 px-4">
-                                {diagnosticLabInfo?.id}
+                                {diagnosticLabInfo?.registrationId}
                             </a>
                         </div>
 

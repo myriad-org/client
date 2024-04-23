@@ -25,8 +25,6 @@ export default function PatientDashboard() {
     const patientMedicalRecordSystemAddress =
         networkMapping[chainId]?.PatientMedicalRecordSystem[0]
 
-    
-
     useEffect(() => {
         const fetchPatient = async () => {
             if (patientAddress) {
@@ -67,7 +65,7 @@ export default function PatientDashboard() {
                     // setting up the patientInfo hash
                     const ipfsInfoHash = res[1]
                     fetch(
-                        process.env.pinata_gateway_url +
+                        process.env.NEXT_PUBLIC_PINATA_GATEWAY_DOMAIN +
                             ipfsInfoHash +
                             "/info.json"
                     ) // generic filename
@@ -142,7 +140,7 @@ export default function PatientDashboard() {
                             <NotRegisteredPatient account={patientAddress} />
                         )
                     ) : (
-                            <PatientWorkflow />
+                        <PatientWorkflow />
                     )}
                 </div>
             </div>

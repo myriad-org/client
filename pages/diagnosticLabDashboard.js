@@ -65,7 +65,7 @@ export default function DiagnosticLabDashboard() {
                     // setting up the diagnosticLabInfo hash
                     const ipfsInfoHash = res[1]
                     fetch(
-                        process.env.pinata_gateway_url +
+                        process.env.NEXT_PUBLIC_PINATA_GATEWAY_DOMAIN +
                             ipfsInfoHash +
                             "/info.json"
                     ) // generic filename
@@ -136,7 +136,9 @@ export default function DiagnosticLabDashboard() {
                                 />
                             </div>
                         ) : isRegistered ? (
-                            <DiagnosticLabProfile diagnosticLabInfo={diagnosticLabInfo} />
+                            <DiagnosticLabProfile
+                                diagnosticLabInfo={diagnosticLabInfo}
+                            />
                         ) : (
                             <NotRegistered name="DiagnosticLab" />
                         )

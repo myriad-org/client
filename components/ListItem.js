@@ -4,20 +4,47 @@ import useSWR from "swr"
 import truncatStr from "../utils/truncateString"
 import { Loading, Modal } from "web3uikit"
 import QRCODE from "qrcode"
-import { useState } from "react"
+import timestampToDate from "../utils/timestampToDate"
+import { useState, useEffect } from "react"
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
 export default function ListItem({ metadataURI }) {
     const [visible, setVisible] = useState(false)
     const [source, setSource] = useState("")
+    const [error, setError] = useState(null)
+    const [fileURI, setFileURI] = useState("")
 
     //Here fetching the metadata
     // console.log("Metadata URI from the ListItem component", metadataURI)
-    const { data, error } = useSWR(
-        `https://${metadataURI}.ipfs.w3s.link`,
-        fetcher
-    )
+    console.log(metadataURI)
+
+    const [metadata, setMetadata] = useState("")
+    useEffect(() => {
+        const fetchMetadata = async () => {
+            const response = await fetch(
+                process.env.NEXT_PUBLIC_PINATA_GATEWAY_DOMAIN +
+                    metadataURI +
+                    "/info.json"
+            )
+            const metadata = await response.json()
+            setMetadata(metadata)
+            const fileURILocal =
+                process.env.NEXT_PUBLIC_PINATA_GATEWAY_DOMAIN +
+                metadata.fileIpfsHash +
+                "/" +
+                encodeURIComponent(metadata?.originalfileName)
+
+            console.log(fileURILocal)
+            console.log("metadata", metadata?.originalfileName)
+            setFileURI(fileURILocal)
+        }
+
+        fetchMetadata().catch((e) => {
+            console.log(e)
+            setError(e)
+        })
+    }, [])
 
     if (error) {
         console.log("Error while fetching file metadata: ", error)
@@ -25,7 +52,7 @@ export default function ListItem({ metadataURI }) {
         return <div></div>
     }
 
-    if (!data) {
+    if (!metadata) {
         return (
             <div>
                 <div
@@ -41,17 +68,15 @@ export default function ListItem({ metadataURI }) {
         )
     }
 
-    if (data) {
+    if (metadata) {
         const onClose = () => {
             setVisible(false)
         }
 
         const handleQRCode = () => {
-            QRCODE.toDataURL(`http://${data.fileIpfsHash}.ipfs.w3s.link`).then(
-                (response) => {
-                    setSource(response)
-                }
-            )
+            QRCODE.toDataURL(fileURI).then((response) => {
+                setSource(response)
+            })
             setVisible(true)
         }
         // console.log(data)
@@ -62,44 +87,46 @@ export default function ListItem({ metadataURI }) {
                         <div className="card-body">
                             <h2 className="card-title" title="file name">
                                 <span className="hover:underline text-sm md:text-lg text-zinc-900">
-                                    {data.name}
+                                    {metadata.name}
                                 </span>
                             </h2>
                             <p>
                                 <span className="font-semibold hover:underline  text-zinc-900">
                                     Date of Upload:
                                 </span>{" "}
-                                {data.dateOfUpload.slice(0, 10)}
+                                <span className="font-semibold hover:underline  text-green-900">
+                                    {timestampToDate(metadata.dateOfUpload)}
+                                </span>{" "}
                             </p>
                             <p>
                                 <span className="font-semibold hover:underline text-zinc-900">
-                                    File URI:
+                                    Wrapped File URI:
                                 </span>{" "}
                                 <span className="hidden md:inline-block badge ml-4">
-                                    {truncatStr(data.fileIpfsHash, 40)}
+                                    {truncatStr(metadata.fileIpfsHash, 40)}
                                 </span>
                                 <span className="inline-block md:hidden badge ml-4">
-                                    {truncatStr(data.fileIpfsHash, 15)}
+                                    {truncatStr(metadata.fileIpfsHash, 15)}
                                 </span>
                             </p>
-                            {data.doctorAddress ? (
+                            {metadata.doctorAddress ? (
                                 <p>
                                     <span className="font-semibold hover:underline  text-zinc-900">
                                         Doctor Address:
                                     </span>
                                     <a
                                         className="inline-block badge pb-3 ml-4 badge-warning"
-                                        href={`https://goerli.etherscan.io/address/${data.doctorAddress}`}
+                                        href={`https://sepolia.etherscan.io/address/${metadata.doctorAddress}`}
                                         target="_blank"
                                     >
-                                        {data.doctorAddress}
+                                        {metadata.doctorAddress}
                                     </a>
                                     <a
                                         className="inline-block md:hidden badge ml-4 badge-warning"
-                                        href={`https://goerli.etherscan.io/address/${data.doctorAddress}`}
+                                        href={`https://sepolia.etherscan.io/address/${metadata.doctorAddress}`}
                                         target="_blank"
                                     >
-                                        {truncatStr(data.doctorAddress, 15)}
+                                        {truncatStr(metadata.doctorAddress, 15)}
                                     </a>
                                 </p>
                             ) : (
@@ -107,10 +134,7 @@ export default function ListItem({ metadataURI }) {
                             )}
                             <div className="card-actions justify-around mt-3">
                                 <button className="btn btn-primary btn-sm">
-                                    <a
-                                        href={`https://ipfs.io/ipfs/${data.fileIpfsHash}`}
-                                        target="_blank"
-                                    >
+                                    <a href={fileURI} target="_blank">
                                         View File
                                     </a>
                                 </button>

@@ -3,34 +3,24 @@ import { useMoralis, useWeb3Contract } from "react-moralis"
 import { Modal, Input, Select, useNotification } from "web3uikit"
 import networkMapping from "../constants/networkMapping.json"
 import PatientMedicalRecordSystemAbi from "../constants/PatientMedicalRecordSystem.json"
-import { GET_PUBLIC_KEYS } from "../constants/subgraphQueries"
-import { useQuery } from "@apollo/client"
 import NodeRSA from "node-rsa"
-import {Web3Storage} from "web3.storage"
-
 
 export default function AddPatientModal({ isVisible, onClose }) {
     const dispatch = useNotification()
     const { runContractFunction } = useWeb3Contract()
-    const [patientAddressToAddTo, setPatientAddressToAddTo] = useState("")
-    const [category, setCategory] = useState(3)
+    const [patientAddress, setPatientAddress] = useState("")
+    const [patientInfo, setPatientInfo] = useState({})
+    const [category, setCategory] = useState("acuteHash")
     const [file, setFile] = useState(null)
     const [fileName, setFileName] = useState("")
     const [cancelDisabled, setCancelDisabled] = useState(false)
     const [okDisabled, setOkDisabled] = useState(false)
 
-    const { chainId: chainHexId, account } = useMoralis()
-    // console.log(chainId)
-    const chainId = chainHexId ? parseInt(chainHexId).toString() : "31337"
-    const medicalRecordSystemAddress =
-        networkMapping[chainId]?.PatientMedicalRecordSystem[0]
+    const { chainId: chainHexId, account: doctorAddress } = useMoralis()
 
-    // console.log(medicalRecordSystemAddress)
-    const {
-        loading: fetchingAddedPublicKeys,
-        error,
-        data: addedPublicKeys,
-    } = useQuery(GET_PUBLIC_KEYS)
+    const chainId = chainHexId ? parseInt(chainHexId).toString() : "31337"
+    const patientMedicalRecordSystem =
+        networkMapping[chainId]?.PatientMedicalRecordSystem[0]
 
     const handleAddedPatientDetailsSuccess = async (tx) => {
         await tx.wait(1)
@@ -44,21 +34,104 @@ export default function AddPatientModal({ isVisible, onClose }) {
         onClose && onClose() //closing the modal on success
     }
 
-    const convertCategoryToInt = (category) => {
-        if (category === "vaccination") {
-            return 0
-        } else if (category === "accidental") {
-            return 1
-        } else if (category === "chronic") {
-            return 2
-        } else if (category === "acute") {
-            return 3
-        } else {
-            return 3 //by default it is trefated as acute.
+    // Takes a JS object and returns a json file object
+    const generateFileToUpload = async (info) => {
+        const infoBlob = new Blob([JSON.stringify(info, null, 2)], {
+            type: "application/json",
+        })
+        return new File([infoBlob], "info.json", { type: "application/json" })
+    }
+
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+    const initiateGetPatientDetailsFunction = async () => {
+        const getPatientDetailsOptions = {
+            abi: PatientMedicalRecordSystemAbi,
+            contractAddress: patientMedicalRecordSystem,
+            functionName: "getPatientDetails",
+            params: {
+                _patientAddress: patientAddress,
+            },
+        }
+
+        // initiating the getPatientDetails function
+        await runContractFunction({
+            params: getPatientDetailsOptions,
+            onError: (error) => {
+                console.log(
+                    "Error while calling getPatientDetails function",
+                    error
+                )
+            },
+            onSuccess: (res) => {
+                if (res[2] == false) {
+                    console.log("Patient is not registered")
+                } else {
+                    console.log("Patient is registered")
+
+                    // setting up the patientInfo hash
+                    const ipfsInfoHash = res[1]
+                    fetch(
+                        process.env.NEXT_PUBLIC_PINATA_GATEWAY_DOMAIN +
+                            ipfsInfoHash +
+                            "/info.json"
+                    ) // generic filename
+                        .then((response) => {
+                            if (!response.ok) {
+                                console.error("Couldn't fetch IFPS info")
+                            }
+                            return response.json()
+                        })
+                        .then(async (patientInfo) => {
+                            console.log(patientInfo)
+                            // Move encryption logic here
+                            await initiateAddPatientDetailsTransaction(
+                                patientInfo
+                            )
+                            // setPatientInfo(data)
+                        })
+                        .catch((error) => {
+                            console.error("Error fetching IFPS info:", error)
+                        })
+                }
+            },
+        })
+    }
+
+    const uploadFileToIpfs = async (fileToUpload) => {
+        const pinataPinUrl = "https://api.pinata.cloud/pinning/pinFileToIPFS"
+        const folder = `${patientAddress}_json`
+        const files = [fileToUpload]
+
+        const data = new FormData()
+
+        Array.from(files).forEach((file) => {
+            data.append("file", file, `${folder}/${file.name}`)
+        })
+        const pinataMetadata = JSON.stringify({
+            name: `${folder}`,
+        })
+        data.append("pinataMetadata", pinataMetadata)
+        const req = {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`,
+            },
+            body: data,
+        }
+
+        try {
+            const res = await fetch(pinataPinUrl, req)
+            console.log(req, res)
+            const resData = await res.json()
+            console.log(resData)
+            return resData.IpfsHash
+        } catch (error) {
+            console.log(error)
         }
     }
 
-    const initiateAddPatientDetailsTransaction = async () => {
+    const initiateAddPatientDetailsTransaction = async (patientInfo) => {
         //Getting the parameters for the transaction
         //we have patientAddress, category and file.
         //we need to encrypt the file and upload the encrypted file to ipfs and get the hash.
@@ -66,72 +139,51 @@ export default function AddPatientModal({ isVisible, onClose }) {
         setOkDisabled(true)
         setCancelDisabled(true)
 
-        // console.log("inside function patient Publick key:", addedPublicKeys)
-        let patientPublicKey
-        if (!fetchingAddedPublicKeys && addedPublicKeys) {
-            for (let item of addedPublicKeys.addedPublicKeys) {
-                if (
-                    item.patientAddress.toString().toLowerCase() ==
-                    patientAddressToAddTo.toString().toLocaleLowerCase()
-                ) {
-                    patientPublicKey = item.publicKey
-                }
-            } //handle the case where the addresses doesnot match
-        }
-        // console.log('inside function : ', patientPublicKey)
-        // console.log(category)
-
         //uploading file to ipfs
         let fileIpfsHash
         try {
-            const client = new Web3Storage({ token: process.env.web3storage_token })
-            const cid = await client.put([file], {wrapWithDirectory: false})
-            fileIpfsHash = cid.toString()
-            // console.log("hash: ",fileIpfsHash)
+            fileIpfsHash = await uploadFileToIpfs(file)
+            console.log("IPFS hash of file: ", fileIpfsHash)
         } catch (e) {
-            console.log("IPFS Upload Error", e)
+            console.error("unable to upload file to IPFS", e)
         }
+
+        console.log("original file name: ", file.name)
 
         const fileMetadata = {
             name: fileName,
-            dateOfUpload: new Date(),
+            originalfileName: file.name,
+            dateOfUpload: Date.now(),
             fileIpfsHash: fileIpfsHash,
-            doctorAddress: account,
+            doctorAddress: doctorAddress,
         }
 
-        // console.log("fileMetadata", fileMetadata)
-
-        //uploading the fileMetadata to IPFS
-        let IpfsHash
-        try {
-            const blob = new Blob([JSON.stringify(fileMetadata)], {
-                type: "application/json",
-            })
-
-            const files = [
-                new File([blob], "fileMetadata.json"),
-            ]
-            const client = new Web3Storage({
-                token: process.env.web3storage_token,
-            })
-            const cid = await client.put(files, { wrapWithDirectory: false })
-            IpfsHash = cid.toString()
-
-            // console.log("metadata hash: ", IpfsHash)
-
-        } catch (e) {
-            console.log(e)
-        }
+        const jsonMetadataFileToUpload = await generateFileToUpload(
+            fileMetadata
+        )
+        const IpfsHash = await uploadFileToIpfs(jsonMetadataFileToUpload)
 
         // console.log("fileMetadata Hash: ", IpfsHash)     ///-------------
         // console.log("Link: ", `ipfs.infura.io/ipfs/${IpfsHash}`)
 
         //encrypting the fileMetadata using the public key of the patient
         // console.log("patientPublicKey: ", patientPublicKey)   ///---------
-        const publicKeyPatient = new NodeRSA(patientPublicKey)
+        console.log("Patient Info: ", patientInfo)
+        const publicKeyPatient = new NodeRSA(patientInfo.publicKey)
         const encryptedIpfsHash = publicKeyPatient.encrypt(IpfsHash, "base64")
 
         console.log("encrypted IPFS hash: ", encryptedIpfsHash)
+
+        // Upload the patientInfo again to IPFS
+        // by appending the new encryptedIpfsHash to the specific category.
+        // call addPatientDetails function with this new patientInfo
+
+        // appending the encryptedIpfsHash to the patientInfo based on category.
+        patientInfo[category].push(encryptedIpfsHash)
+
+        const newPatientInfoHash = await uploadFileToIpfs(
+            await generateFileToUpload(patientInfo)
+        )
 
         dispatch({
             type: "success",
@@ -141,24 +193,19 @@ export default function AddPatientModal({ isVisible, onClose }) {
             position: "bottomL",
         })
 
-        // console.log(patientAddressToAddTo)
-        // console.log(category)
-        // console.log(encryptedIpfsHash)
-
         const addPatientDetailsOptions = {
             abi: PatientMedicalRecordSystemAbi,
-            contractAddress: medicalRecordSystemAddress,
+            contractAddress: patientMedicalRecordSystem,
             functionName: "addPatientDetails",
             params: {
-                _patientAddress: patientAddressToAddTo, //Input by the doctor
-                _category: category.toString(), //This will be chosen by the doctor
-                _IpfsHash: encryptedIpfsHash, //This will be the encrypted IpfsHash of the file Metadata of the file uploaded by the doctor.
+                _patientAddress: patientAddress, //Input by the doctor
+                _patientInfo: newPatientInfoHash, //This will be the encrypted IpfsHash of the file Metadata of the file uploaded by the doctor.
+                _isUpdate: true,
                 options: { gasLimit: 3e6 },
             },
         }
 
-        // //Actually calling the function. [This is where the transaction initiation actually begins].
-
+        // initiating the addPatientDetails function
         await runContractFunction({
             params: addPatientDetailsOptions,
             onError: (error) => {
@@ -174,14 +221,12 @@ export default function AddPatientModal({ isVisible, onClose }) {
         setCancelDisabled(false)
     }
 
-    // console.log('public keys:', fetchingAddedPublicKeys? "null" : addedPublicKeys.addedPublicKeys[0].publicKey)
-
     return (
         <Modal
             isVisible={isVisible}
             onCancel={onClose}
             onCloseButtonPressed={onClose}
-            onOk={initiateAddPatientDetailsTransaction}
+            onOk={initiateGetPatientDetailsFunction}
             isCancelDisabled={cancelDisabled}
             isOkDisabled={okDisabled}
         >
@@ -191,7 +236,7 @@ export default function AddPatientModal({ isVisible, onClose }) {
                     name="Patient Account Address"
                     type="text"
                     onChange={(event) => {
-                        setPatientAddressToAddTo(event.target.value)
+                        setPatientAddress(event.target.value)
                     }}
                 />
             </div>
@@ -200,23 +245,23 @@ export default function AddPatientModal({ isVisible, onClose }) {
                 <Select
                     label="Choose Category"
                     onChange={(option) => {
-                        setCategory(convertCategoryToInt(option.id))
+                        setCategory(option.id)
                     }}
                     options={[
                         {
-                            id: "vaccination",
+                            id: "vaccinationHash",
                             label: "Vaccination",
                         },
                         {
-                            id: "accidental",
-                            label: "Accidental",
+                            id: "accidentHash",
+                            label: "Accident",
                         },
                         {
-                            id: "chronic",
+                            id: "chronicHash",
                             label: "Chronic",
                         },
                         {
-                            id: "acute",
+                            id: "acuteHash",
                             label: "Acute",
                         },
                     ]}

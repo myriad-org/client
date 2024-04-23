@@ -1,6 +1,6 @@
 import truncatStr from "../utils/truncateString"
 import timestampToDate from "../utils/timestampToDate"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import ListMedicalFiles from "./ListMedicalFiles"
 import { Modal, useNotification } from "web3uikit"
 import NodeRSA from "node-rsa"
@@ -28,6 +28,17 @@ export default function PatientProfile({ patientInfo }) {
     const [iscorrectlyDecrypted, setIsCorrectlyDecrypted] = useState(true)
     const [showErrorModal, setShowErrorModal] = useState(!iscorrectlyDecrypted)
 
+    useEffect(() => {
+        setHaveVaccinationFile(patientInfo?.vaccinationHash?.length)
+        console.log("Vaccination Hash: ", patientInfo?.vaccinationHash)
+        setHaveChronicFile(patientInfo?.chronicHash?.length)
+        console.log("Chronic Hash: ", patientInfo?.chronicHash)
+        setHaveAccidentFile(patientInfo?.accidentHash?.length)
+        console.log("Accident Hash: ", patientInfo?.accidentHash)
+        setHaveAcuteFile(patientInfo?.acuteHash?.length)
+        console.log("Acute Hash: ", patientInfo?.acuteHash)
+    }, [patientInfo])
+
     const handleClick = () => {
         setShowModal(true)
     }
@@ -37,10 +48,10 @@ export default function PatientProfile({ patientInfo }) {
         setShowFiles(false)
     }
     const decryptHash = (encryptedHash) => {
-        // console.log(encryptedHash)
+        console.log(encryptedHash)
         const key_private = new NodeRSA(privateKey)
         const decryptedHash = key_private.decrypt(encryptedHash, "utf8")
-        // console.log(decryptedHash)
+        console.log(decryptedHash)
         return decryptedHash
     }
 
@@ -55,37 +66,38 @@ export default function PatientProfile({ patientInfo }) {
         try {
             haveVaccinationFile &&
                 setDecryptedVaccinationHash(
-                    vaccinationHash.map((encryptedHash) => {
+                    patientInfo?.vaccinationHash?.map((encryptedHash) => {
                         return decryptHash(encryptedHash)
                     })
                 )
 
             haveAccidentFile &&
                 setDecryptedAccidentHash(
-                    accidentHash.map((encryptedHash) => {
+                    patientInfo?.accidentHash?.map((encryptedHash) => {
                         return decryptHash(encryptedHash)
                     })
                 )
 
             haveChronicFile &&
                 setDecryptedChronicHash(
-                    chronicHash.map((encryptedHash) => {
+                    patientInfo?.chronicHash?.map((encryptedHash) => {
                         return decryptHash(encryptedHash)
                     })
                 )
             haveAcuteFile &&
                 setDecryptedAcuteHash(
-                    acuteHash.map((encryptedHash) => {
+                    patientInfo?.acuteHash?.map((encryptedHash) => {
                         return decryptHash(encryptedHash)
                     })
                 )
-            // console.log("decryptedVaccinationHash:", decryptedVaccinationHash)
+
         } catch (e) {
-            console.log(e)
+            console.log("Error while trying to decrypt: ", e)
             setIsCorrectlyDecrypted(false)
             setShowErrorModal(true)
             setShowModal(false)
         }
+
         //If it has no files in any category
         if (
             !(
@@ -95,6 +107,7 @@ export default function PatientProfile({ patientInfo }) {
                 haveVaccinationFile
             )
         ) {
+            console.log("patientInfo: ", patientInfo)
             dispatch({
                 type: "warning",
                 title: "No Files Found",

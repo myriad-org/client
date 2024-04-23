@@ -44,7 +44,7 @@ export default function ClinicProfile({
                             </span>
                             :{" "}
                             <a className="badge badge-warning ml-3 md:p-2 px-4">
-                                {clinicInfo?.id}
+                                {clinicInfo?.registrationId}
                             </a>
                         </div>
 
