@@ -26,8 +26,6 @@ export default function RegisterPatientModal({ isVisible, onClose, account }) {
     const medicalRecordSystemAddress =
         networkMapping[chainId]?.PatientMedicalRecordSystem[0]
 
-    // console.log("I am contract address", medicalRecordSystemAddress)
-    // console.log("I am chain Id: ", chainId)
     const handleRegisterPatientSuccess = async (tx) => {
         await tx.wait(1)
         dispatch({
@@ -49,6 +47,44 @@ export default function RegisterPatientModal({ isVisible, onClose, account }) {
         return { publicKey, privateKey }
     }
 
+    const uploadInfoToIpfs = async (info) => {
+        const pinataPinUrl = "https://api.pinata.cloud/pinning/pinFileToIPFS"
+        const folder = `${info.patientAddress}_json`
+        const infoBlob = new Blob([JSON.stringify(info, null, 2)], {
+            type: "application/json",
+        })
+        const files = [
+            new File([infoBlob], "info.json", { type: "application/json" }),
+        ]
+
+        const data = new FormData()
+
+        Array.from(files).forEach((file) => {
+            data.append("file", file, `${folder}/${file.name}`)
+        })
+        const pinataMetadata = JSON.stringify({
+            name: `${folder}`,
+        })
+        data.append("pinataMetadata", pinataMetadata)
+        const req = {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`,
+            },
+            body: data,
+        }
+        
+        try {
+            const res = await fetch(pinataPinUrl, req)
+            console.log(req, res)
+            const resData = await res.json()
+            console.log(resData)
+            return resData.IpfsHash
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     const initiateRegisterPatientTransaction = async () => {
         setCancelDisabled(true)
         setOkDisabled(true)
@@ -57,8 +93,7 @@ export default function RegisterPatientModal({ isVisible, onClose, account }) {
         setPublicKey(keys.publicKey)
         setPrivateKey(keys.privateKey)
 
-        // console.log(`publicKey: ${keys.publicKey}`)
-        // console.log(`privateKey: ${privateKey}`)
+        //NOTIFICATION FOR GEENRATING PUBLIC AND PRIVATE KEYS
         dispatch({
             type: "success",
             title: "Public and Private Keys Generated",
@@ -68,24 +103,36 @@ export default function RegisterPatientModal({ isVisible, onClose, account }) {
             isClosing: !okDisabled && !cancelDisabled,
         })
 
-        //NOTIFICATION FOR GEENRATING PUBLIC AND PRIVATE KEYS
+        const patientMetadata = {
+            patientAddress: patientAddress,
+            name: name,
+            dob: dob,
+            phoneNumber: phoneNumber,
+            bloodGroup: bloodGroup,
+            publicKey: keys.publicKey,
+            timestamp: Date.now(),
+            vaccinationHash: new Array(),
+            acuteHash: new Array(),
+            chronicHash: new Array(),
+            accidentHash: new Array(),
+        }
+        
+        // uploading the patient metadata to IPFS
+        const ipfsInfoHash = await uploadInfoToIpfs(patientMetadata)
 
-        // ---------Here I am getting the contract function which has to be run for registerPatient -----------------------
+        // setting up the options for the registerPatient function
         const registerPatientOptions = {
             abi: PatientMedicalRecordSystemAbi,
             contractAddress: medicalRecordSystemAddress,
             functionName: "registerPatient",
             params: {
                 _patientAddress: patientAddress,
-                _name: name,
-                _dob: dob,
-                _phoneNumber: 0,    //phoneNumber
-                _bloodGroup: bloodGroup,
-                _publicKey: keys.publicKey,
+                _patientInfo: ipfsInfoHash,
+                _isUpdate: "false",
             },
         }
 
-        //Acutaly calling the function. [This is where the transaction initiation actually begins].
+        // intiating the registerPatient function
         await runContractFunction({
             params: registerPatientOptions,
             onError: (error) => {
@@ -99,7 +146,6 @@ export default function RegisterPatientModal({ isVisible, onClose, account }) {
     }
 
     const downloadPrivateKey = async () => {
-        // console.log("I am a private Key", privateKey)
         const element = document.createElement("a")
         const file = await new Blob(
             [
@@ -116,7 +162,6 @@ export default function RegisterPatientModal({ isVisible, onClose, account }) {
         element.click()
     }
     const downloadPublicKey = async () => {
-        // console.log("I am a public key inside function", publicKey)
         const element = document.createElement("a")
         const file = await new Blob(
             [

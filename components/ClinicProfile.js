@@ -2,7 +2,9 @@ import truncatStr from "../utils/truncateString"
 import timestampToDate from "../utils/timestampToDate"
 import { useState } from "react"
 
-export default function HospitalProfile({ hospitalInfo }) {
+export default function ClinicProfile({
+    clinicInfo
+}) {
     return (
         <div>
             <div>
@@ -15,13 +17,13 @@ export default function HospitalProfile({ hospitalInfo }) {
                                 </span>
                                 :{" "}
                                 <span className="font-serif md:text-xl font-normal">
-                                    {hospitalInfo?.name}
+                                    {clinicInfo?.name}
                                 </span>
                             </span>
                         </div>
                         <div className="mb-1">
                             <span className="font-sans md:text-xl font-medium hover:underline">
-                                Hospital Account Address
+                                Clinic Account Address
                             </span>
                             :{" "}
                             <a
@@ -30,19 +32,19 @@ export default function HospitalProfile({ hospitalInfo }) {
                                 target="_blank"
                                 href={
                                     "https://goerli.etherscan.io/address/" +
-                                    hospitalInfo?.hospitalAddress
+                                    clinicInfo?.clinicAddress
                                 }
                             >
-                                {truncatStr(hospitalInfo?.hospitalAddress, 20)}
+                                {truncatStr(clinicInfo?.clinicAddress, 20)}
                             </a>
                         </div>
                         <div className="mb-1">
                             <span className="font-sans md:text-xl font-medium hover:underline">
-                                Hospital Registration Id
+                                Clinic Registration Id
                             </span>
                             :{" "}
                             <a className="badge badge-warning ml-3 md:p-2 px-4">
-                                {hospitalInfo?.id}
+                                {clinicInfo?.id}
                             </a>
                         </div>
 
@@ -51,9 +53,7 @@ export default function HospitalProfile({ hospitalInfo }) {
                                 E-mail
                             </span>
                             :{" "}
-                            <span className="badge badge-accent">
-                                {hospitalInfo?.email}
-                            </span>
+                            <span className="badge badge-accent">{clinicInfo?.email}</span>
                         </div>
                         <div>
                             <span className="font-sans md:text-xl font-medium hover:underline">
@@ -61,7 +61,7 @@ export default function HospitalProfile({ hospitalInfo }) {
                             </span>
                             :{" "}
                             <span className="badge badge-warning">
-                                {hospitalInfo?.phoneNumber}
+                                {clinicInfo?.phoneNumber}
                             </span>
                         </div>
                         <div>
@@ -70,7 +70,7 @@ export default function HospitalProfile({ hospitalInfo }) {
                             </span>
                             :{" "}
                             <span className="badge badge-accent">
-                                {timestampToDate(hospitalInfo?.timestamp)}
+                                {timestampToDate(clinicInfo?.timestamp)}
                             </span>
                         </div>
                     </div>

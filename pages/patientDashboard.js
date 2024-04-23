@@ -1,36 +1,92 @@
 import Head from "next/head"
-import { useMoralis } from "react-moralis"
+import { useMoralis, useWeb3Contract } from "react-moralis"
 import { ConnectButton, Loading } from "web3uikit"
 import Header from "../components/Header"
 import PatientWorkflow from "../components/PatientWorkflow"
-import { useQuery } from "@apollo/client"
 import networkMapping from "../constants/networkMapping.json"
-import { GET_ADDED_PATIENTS } from "../constants/subgraphQueries"
+import PatientMedicalRecordSystemAbi from "../constants/PatientMedicalRecordSystem.json"
 import PatientProfile from "../components/PatientProfile"
 import NotRegisteredPatient from "../components/NotRegisteredPatient"
+import { useEffect, useState } from "react"
 
 export default function PatientDashboard() {
-    const { isWeb3Enabled, chainId: chainHexId, account } = useMoralis()
+    const {
+        isWeb3Enabled,
+        chainId: chainHexId,
+        account: patientAddress,
+    } = useMoralis()
+    const { runContractFunction } = useWeb3Contract()
+
+    const [patientInfo, setPatientInfo] = useState({})
+    const [isLoading, setIsLoading] = useState(true)
+    const [isRegistered, setIsRegistered] = useState(false)
 
     const chainId = chainHexId ? parseInt(chainHexId).toString() : "31337"
-    // console.log(chainId)
     const patientMedicalRecordSystemAddress =
         networkMapping[chainId]?.PatientMedicalRecordSystem[0]
-    const {
-        loading: fetchingAddedPatients,
-        error,
-        data: addedPatients,
-    } = useQuery(GET_ADDED_PATIENTS)
 
-    let isRegistered = false
-    let patientAddresses
-    if (!fetchingAddedPatients && addedPatients) {
-        patientAddresses = addedPatients.addedPatients.map(
-            (patient) => patient.patientAddress
-        )
-        if (patientAddresses.includes(account)) {
-            isRegistered = true
+    
+
+    useEffect(() => {
+        const fetchPatient = async () => {
+            if (patientAddress) {
+                await initiateGetPatientDetailsFunction()
+            }
         }
+
+        fetchPatient().catch((e) => console.log("Error in useEffect", e))
+    }, [patientAddress])
+
+    const initiateGetPatientDetailsFunction = async () => {
+        const getPatientDetailsOptions = {
+            abi: PatientMedicalRecordSystemAbi,
+            contractAddress: patientMedicalRecordSystemAddress,
+            functionName: "getPatientDetails",
+            params: {
+                _patientAddress: patientAddress,
+            },
+        }
+
+        // Actually calling the function. [This is where the transaction initiation actually begins].
+        await runContractFunction({
+            params: getPatientDetailsOptions,
+            onError: (error) => {
+                console.log(
+                    "Error while calling getPatientDetails function",
+                    error
+                )
+            },
+            onSuccess: (res) => {
+                setIsLoading(false)
+                if (res[2] == false) {
+                    console.log("Patient is not registered")
+                } else {
+                    console.log("Patient is registered")
+                    setIsRegistered(true)
+
+                    // setting up the patientInfo hash
+                    const ipfsInfoHash = res[1]
+                    fetch(
+                        process.env.pinata_gateway_url +
+                            ipfsInfoHash +
+                            "/info.json"
+                    ) // generic filename
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error("Couldn't fetch IFPS info")
+                            }
+                            return response.json()
+                        })
+                        .then((data) => {
+                            console.log(data)
+                            setPatientInfo(data)
+                        })
+                        .catch((error) => {
+                            console.error("Error fetching IFPS info:", error)
+                        })
+                }
+            },
+        })
     }
 
     return (
@@ -60,7 +116,7 @@ export default function PatientDashboard() {
 
                 <div className="ml-10 w-4/6">
                     {isWeb3Enabled ? (
-                        fetchingAddedPatients || !addedPatients ? (
+                        isLoading ? (
                             <div
                                 style={{
                                     backgroundColor: "#ECECFE",
@@ -79,59 +135,17 @@ export default function PatientDashboard() {
                                 />
                             </div>
                         ) : isRegistered ? (
-                            addedPatients.addedPatients.map((patient) => {
-                                patientAddresses.push(patient.patientAddress)
-                                if (patient.patientAddress === account) {
-                                    const {
-                                        name,
-                                        patientAddress,
-                                        dateOfRegistration,
-                                        dob,
-                                        phoneNumber,
-                                        bloodGroup,
-                                        vaccinationHash,
-                                        accidentHash,
-                                        chronicHash,
-                                        acuteHash,
-                                    } = patient
-                                    return (
-                                        <div key={patientAddress}>
-                                            <PatientProfile
-                                                key={patientAddress}
-                                                name={name}
-                                                patientAddress={patientAddress}
-                                                dateOfRegistration={
-                                                    dateOfRegistration
-                                                }
-                                                dob={dob}
-                                                phoneNumber={phoneNumber}
-                                                bloodGroup={bloodGroup}
-                                                vaccinationHash={
-                                                    vaccinationHash
-                                                }
-                                                accidentHash={accidentHash}
-                                                chronicHash={chronicHash}
-                                                acuteHash={acuteHash}
-                                            />
-                                        </div>
-                                    )
-                                }
-                            })
+                            <div>
+                                <PatientProfile patientInfo={patientInfo} />
+                            </div>
                         ) : (
-                            <NotRegisteredPatient account={account} />
+                            <NotRegisteredPatient account={patientAddress} />
                         )
                     ) : (
-                        <div>
                             <PatientWorkflow />
-                        </div>
                     )}
                 </div>
             </div>
         </div>
     )
 }
-
-/* 1. registered patients can view their details. 
-                        
-2. Registered patients can add diagnostic tests and diagnosis details in a particular patient's record. For this Add a Button which opens a modal form.
-*/

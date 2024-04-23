@@ -19,19 +19,19 @@ export default function Home() {
                 <div className="relative items-center justify-center w-full overflow-x-hidden lg:pt-40 lg:pb-24 xl:pt-24 xl:pb-64">
                     <div className="container flex flex-col items-center justify-between h-full max-w-6xl px-8 mx-auto -mt-32 lg:flex-row xl:px-0">
                         <div className="z-30 flex flex-col items-center w-full max-w-xl pt-48 text-center lg:items-start lg:w-1/2 lg:pt-20 xl:pt-40 lg:text-left">
-                            <h1 className="relative mb-4 text-3xl font-black leading-tight text-gray-900 sm:text-6xl xl:mb-8">
-                                Decentralized Telemedicine and Governance
-                                Platform
+                            <h1 className="relative mb-4 text-2xl font-black leading-tight text-gray-900 sm:text-4xl xl:mb-8">
+                                Empowering Patients, Revolutionizing Healthcare
                             </h1>
-                            <p className="pr-0 mb-8 text-base text-gray-600 sm:text-lg xl:text-xl lg:pr-20">
-                                A decentralized system where governance is
-                                decentralized and patients have key to their
-                                medical data, giving them full control over
-                                their own health data.
+                            <p className="pr-0 mb-8 text-base text-gray-600 sm:text-md xl:text-lg lg:pr-20 text-justify">
+                                A digital medical platform governed with DAO,
+                                enabling changes to be made by medical
+                                community. Features decentralized storage of
+                                medical files secured with public key
+                                cryptography.
                             </p>
                             <button className="btn btn-primary md:btn-md btn-sm text-center">
                                 <Link href="/patientDashboard">
-                                    <a>Patient Login</a>
+                                    <a>Patient</a>
                                 </Link>
                             </button>
                             <button className="btn btn-primary md:btn-base btn-sm md:hidden mt-4 md:mt-0">
@@ -45,8 +45,13 @@ export default function Home() {
                                 </Link>
                             </button>
                             <button className="btn btn-primary md:btn-base btn-sm md:hidden mt-4 md:mt-0">
-                                <Link href="/hospitalDashboard">
+                                <Link href="/clinicDashboard">
                                     <a>Clinic Login</a>
+                                </Link>
+                            </button>
+                            <button className="btn btn-primary md:btn-base btn-sm md:hidden mt-4 md:mt-0">
+                                <Link href="/diagnosticLabDashboard">
+                                    <a>Diagnostic Lab Login</a>
                                 </Link>
                             </button>
                             <button className="btn btn-primary md:btn-base btn-sm md:hidden mt-4 md:mt-0">
@@ -58,7 +63,7 @@ export default function Home() {
                         <div className="relative z-50 flex flex-col items-end justify-center w-full h-full lg:w-1/2 ms:pl-10">
                             <div className="container relative left-0 w-full max-w-4xl lg:absolute lg:w-screen">
                                 <img
-                                    src="/myriad_logo.jpeg"
+                                    src="/myriad_hero.png"
                                     className="mt-1224 w-auto h-auto rounded-lg lg:w-3/4 lg:h-3/4 lg:mt-12"
                                 />
                             </div>
@@ -114,7 +119,7 @@ export default function Home() {
                             </div>
 
                             <div className="w-full max-w-md p-4 mx-auto mb-0 sm:mb-16 lg:mb-0 lg:w-1/3">
-                                <div className="relative flex flex-col items-center justify-center w-full h-full p-20 mr-5 rounded-lg">
+                                <div className="relative flex flex-col items-center justify-center w-full h-full p-20 px-10 mr-5 rounded-lg">
                                     {/* We have a SVG here */}
                                     <img
                                         src="/abstractBackground2.svg"
@@ -128,13 +133,13 @@ export default function Home() {
                                         className="relative w-20 h-20"
                                     />
                                     <h4 className="relative mt-6 text-lg font-bold">
-                                        Immutability
+                                        Decentralized Governance
                                     </h4>
                                     <p className="relative mt-2 md:text-base text-sm text-center text-gray-600">
-                                        Being deployed on public blockchain,
-                                        this application makes sure that the
-                                        patient's data is permanent, indellible
-                                        and unalterable.
+                                        Everyone contributes to the decision
+                                        making process through the DAO. This
+                                        ensures that the platform is always
+                                        evolving to meet everyone's need.
                                     </p>
                                     <a
                                         href="https://www.solulab.com/what-is-immutable-ledger-in-blockchain-and-its-benefits"

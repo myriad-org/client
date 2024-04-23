@@ -1,42 +1,90 @@
-//This is the Dashboard of the hospital. This logs in the hospital and hospital can view their information.
-//This is just a add-on / redundant page. Just entity was coming up so I made this new page.
-
 import Head from "next/head"
-import { useMoralis } from "react-moralis"
+import { useMoralis, useWeb3Contract } from "react-moralis"
 import networkMapping from "../constants/networkMapping.json"
-import { useQuery } from "@apollo/client"
+import PatientMedicalRecordSystemAbi from "../constants/PatientMedicalRecordSystem.json"
 import { ConnectButton, Loading } from "web3uikit"
 import Header from "../components/Header"
 import HospitalWorkflow from "../components/HospitalWorkflow"
-import { GET_ADDED_HOSPITALS } from "../constants/subgraphQueries"
 import HospitalProfile from "../components/HospitalProfile"
 import NotRegistered from "../components/NotRegistered"
+import { useState, useEffect } from "react"
 
 export default function HospitalDashboard() {
-    const { isWeb3Enabled, chainId: chainHexId, account } = useMoralis()
-    const chainId = chainHexId ? parseInt(chainHexId).toString() : "31337"
-    console.log(chainId)
-    const patientMedicalRecordSystemAddress =
-        networkMapping[chainId]?.PatientMedicalRecordSystem[-1]
     const {
-        loading: fetchingAddedHospitals,
-        error,
-        data: addedHospitals,
-    } = useQuery(GET_ADDED_HOSPITALS)
+        isWeb3Enabled,
+        chainId: chainHexId,
+        account: hospitalAddress,
+    } = useMoralis()
+    const { runContractFunction } = useWeb3Contract()
 
-    // if (!fetchingAddedHospitals && addedHospitals) {
-    //     console.log(addedHospitals)
-    // }
+    const [hospitalInfo, setHospitalInfo] = useState({})
+    const [isLoading, setIsLoading] = useState(true)
+    const [isRegistered, setIsRegistered] = useState(false)
 
-    let hospitalProfileFound = false
-    let hospitalAddresses
-    if (!fetchingAddedHospitals && addedHospitals) {
-        hospitalAddresses = addedHospitals.addedHospitals.map(
-            (hospital) => hospital.hospitalAddress
-        )
-        if (hospitalAddresses.includes(account)) {
-            hospitalProfileFound = true
+    const chainId = chainHexId ? parseInt(chainHexId).toString() : "31337"
+    const patientMedicalRecordSystemAddress =
+        networkMapping[chainId]?.PatientMedicalRecordSystem[0]
+
+    useEffect(() => {
+        const fetchHospital = async () => {
+            if (hospitalAddress) {
+                await initiateGetHospitalDetailsFunction()
+            }
         }
+
+        fetchHospital().catch((e) => console.log("Error in useEffect", e))
+    }, [hospitalAddress])
+
+    const initiateGetHospitalDetailsFunction = async () => {
+        const getHospitalDetailsOptions = {
+            abi: PatientMedicalRecordSystemAbi,
+            contractAddress: patientMedicalRecordSystemAddress,
+            functionName: "getHospitalDetails",
+            params: {
+                _hospitalAddress: hospitalAddress,
+            },
+        }
+
+        // initiating the getHospitalDetails function
+        await runContractFunction({
+            params: getHospitalDetailsOptions,
+            onError: (error) => {
+                console.log(
+                    "Error while calling getHospitalDetails function",
+                    error
+                )
+            },
+            onSuccess: (res) => {
+                setIsLoading(false)
+                if (res[2] == false) {
+                    console.log("Hospital is not registered")
+                } else {
+                    console.log("Hospital is registered")
+                    setIsRegistered(true)
+
+                    // setting up the hospitalInfo hash
+                    const ipfsInfoHash = res[1]
+                    fetch(
+                        process.env.pinata_gateway_url +
+                            ipfsInfoHash +
+                            "/info.json"
+                    ) // generic filename
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error("Couldn't fetch IFPS info")
+                            }
+                            return response.json()
+                        })
+                        .then((data) => {
+                            console.log(data)
+                            setHospitalInfo(data)
+                        })
+                        .catch((error) => {
+                            console.error("Error fetching IFPS info:", error)
+                        })
+                }
+            },
+        })
     }
 
     return (
@@ -69,7 +117,7 @@ export default function HospitalDashboard() {
 
                 <div className="ml-10 w-4/6">
                     {isWeb3Enabled ? (
-                        fetchingAddedHospitals || !addedHospitals ? (
+                        isLoading ? (
                             <div
                                 style={{
                                     backgroundColor: "#ECECFE",
@@ -87,39 +135,8 @@ export default function HospitalDashboard() {
                                     text="Loading Profile..."
                                 />
                             </div>
-                        ) : hospitalProfileFound ? (
-                            addedHospitals.addedHospitals.map((hospital) => {
-                                hospitalAddresses.push(hospital.hospitalAddress)
-                                if (hospital.hospitalAddress === account) {
-                                    const {
-                                        name,
-                                        hospitalAddress,
-                                        email,
-                                        phoneNumber,
-                                        hospitalRegistrationId,
-                                        dateOfRegistration,
-                                    } = hospital
-                                    return (
-                                        <div key={hospitalAddress}>
-                                            <HospitalProfile
-                                                key={hospitalAddress}
-                                                name={name}
-                                                hospitalAddress={
-                                                    hospitalAddress
-                                                }
-                                                email={email}
-                                                phoneNumber={phoneNumber}
-                                                hospitalRegistrationId={
-                                                    hospitalRegistrationId
-                                                }
-                                                dateOfRegistration={
-                                                    dateOfRegistration
-                                                }
-                                            />
-                                        </div>
-                                    )
-                                }
-                            })
+                        ) : isRegistered ? (
+                            <HospitalProfile hospitalInfo={hospitalInfo} />
                         ) : (
                             <NotRegistered name="Hospital" />
                         )

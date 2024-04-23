@@ -7,34 +7,23 @@ import NodeRSA from "node-rsa"
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json())
 
-export default function PatientProfile({
-    name,
-    patientAddress,
-    dob,
-    phoneNumber,
-    bloodGroup,
-    dateOfRegistration,
-    //arrays of encrypted IPFS file metadatas.
-    vaccinationHash,
-    accidentHash,
-    chronicHash,
-    acuteHash,
-}) {
+export default function PatientProfile({ patientInfo }) {
     const dispatch = useNotification()
     const [privateKey, setPrivateKey] = useState("")
     const [showModal, setShowModal] = useState(false)
     const [showFiles, setShowFiles] = useState(false)
     const [haveVaccinationFile, setHaveVaccinationFile] = useState(
-        vaccinationHash && Boolean(vaccinationHash.length)
+        patientInfo?.vaccinationHash &&
+            Boolean(patientInfo.vaccinationHash.length)
     )
     const [haveChronicFile, setHaveChronicFile] = useState(
-        chronicHash && Boolean(chronicHash.length)
+        patientInfo?.chronicHash && Boolean(patientInfo.chronicHash.length)
     )
     const [haveAccidentFile, setHaveAccidentFile] = useState(
-        accidentHash && Boolean(accidentHash.length)
+        patientInfo?.accidentHash && Boolean(patientInfo.accidentHash.length)
     )
     const [haveAcuteFile, setHaveAcuteFile] = useState(
-        acuteHash && Boolean(acuteHash.length)
+        patientInfo?.acuteHash && Boolean(patientInfo.acuteHash.length)
     )
     const [iscorrectlyDecrypted, setIsCorrectlyDecrypted] = useState(true)
     const [showErrorModal, setShowErrorModal] = useState(!iscorrectlyDecrypted)
@@ -200,15 +189,14 @@ export default function PatientProfile({
                         <div className="mb-1">
                             <span>
                                 <span className="font-sans md:text-xl font-medium hover:underline">
-                                    Name
+                                    Name: {" "}
                                 </span>
-                                :{" "}
                                 <span className="font-serif md:text-xl font-normal">
-                                    {name}
+                                    {patientInfo?.name}
                                 </span>
                             </span>
                             <span className="badge badge-warning ml-5 md:p-2.5">
-                                {bloodGroup}
+                                {patientInfo?.bloodGroup}
                             </span>
                         </div>
                         <div className="mb-1">
@@ -221,11 +209,11 @@ export default function PatientProfile({
                                 title="view on etherscan"
                                 target="_blank"
                                 href={
-                                    "https://goerli.etherscan.io/address/" +
-                                    patientAddress
+                                    "https://sepolia.etherscan.io/address/" +
+                                    patientInfo?.patientAddress
                                 }
                             >
-                                {truncatStr(patientAddress, 20)}
+                                {truncatStr(patientInfo?.patientAddress, 20)}
                             </a>
                         </div>
                         <div className="mb-1">
@@ -234,7 +222,7 @@ export default function PatientProfile({
                             </span>
                             :{" "}
                             <a className="badge badge-success ml-3 md:p-2 px-4">
-                                {timestampToDate(dob)}
+                                {timestampToDate(patientInfo?.dob)}
                             </a>
                         </div>
                         <div className="mb-1">
@@ -243,7 +231,9 @@ export default function PatientProfile({
                             </span>
                             :{" "}
                             <a className="badge badge-accent ml-3 md:p-2 px-4">
-                                {timestampToDate(dateOfRegistration)}
+                                {timestampToDate(
+                                    patientInfo?.timestamp
+                                )}
                             </a>
                         </div>
                         {/* <div>

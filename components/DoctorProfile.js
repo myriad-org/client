@@ -3,22 +3,13 @@ import timestampToDate from "../utils/timestampToDate"
 import { useState } from "react"
 import AddPatientModal from "./AddPatientModal"
 
-export default function DoctorProfile({
-    name,
-    doctorAddress,
-    hospitalAddress,
-    specialization,
-    dateOfRegistration,
-    doctorRegistrationId,
-}) {
+export default function DoctorProfile({ doctorInfo }) {
     const [showModal, setShowModal] = useState(false)
 
     const handleButtonClick = () => {
-        // show the modal
         setShowModal(true)
     }
 
-    // console.log(showModal)
     return (
         <div>
             <div>
@@ -37,11 +28,11 @@ export default function DoctorProfile({
                                 </span>
                                 :{" "}
                                 <span className="font-serif md:text-xl font-normal">
-                                    {name}
+                                    {doctorInfo?.name}
                                 </span>
                             </span>
                             <span className="badge badge-warning ml-5 md:p-2.5">
-                                {specialization}
+                                {doctorInfo?.specialization}
                             </span>
                         </div>
                         <div className="mb-1">
@@ -50,7 +41,7 @@ export default function DoctorProfile({
                             </span>
                             :{" "}
                             <a className="badge badge-success ml-3 md:p-2 px-4">
-                                {doctorRegistrationId}
+                                {doctorInfo?.doctorRegistrationId}
                             </a>
                         </div>
                         <div className="mb-1">
@@ -63,11 +54,11 @@ export default function DoctorProfile({
                                 title="view on etherscan"
                                 target="_blank"
                                 href={
-                                    "https://goerli.etherscan.io/address/" +
-                                    doctorAddress
+                                    "https://sepolia.etherscan.io/address/" +
+                                    doctorInfo?.doctorAddress
                                 }
                             >
-                                {truncatStr(doctorAddress, 25)}
+                                {truncatStr(doctorInfo?.doctorAddress, 25)}
                             </a>
                         </div>
                         <div className="mb-1">
@@ -81,10 +72,10 @@ export default function DoctorProfile({
                                 target="_blank"
                                 href={
                                     "https://goerli.etherscan.io/address/" +
-                                    hospitalAddress
+                                    doctorInfo?.hospitalAddress
                                 }
                             >
-                                {truncatStr(hospitalAddress, 20)}
+                                {truncatStr(doctorInfo?.hospitalAddress, 20)}
                             </a>
                         </div>
                         <div>
@@ -93,7 +84,7 @@ export default function DoctorProfile({
                             </span>
                             :{" "}
                             <span className="badge badge-accent">
-                                {timestampToDate(dateOfRegistration)}
+                                {timestampToDate(doctorInfo?.timestamp)}
                             </span>
                         </div>
                     </div>

@@ -1,70 +1,68 @@
 import Head from "next/head"
 import { useMoralis, useWeb3Contract } from "react-moralis"
-import { ConnectButton, Loading } from "web3uikit"
-import Header from "../components/Header"
-import DoctorWorkflow from "../components/DoctorWorkflow"
 import networkMapping from "../constants/networkMapping.json"
 import PatientMedicalRecordSystemAbi from "../constants/PatientMedicalRecordSystem.json"
-import DoctorProfile from "../components/DoctorProfile"
+import { ConnectButton, Loading } from "web3uikit"
+import Header from "../components/Header"
+import ClinicWorkflow from "../components/ClinicWorkflow"
+import ClinicProfile from "../components/ClinicProfile"
 import NotRegistered from "../components/NotRegistered"
 import { useState, useEffect } from "react"
 
-export default function DoctorDashboard() {
+export default function ClinicDashboard() {
     const {
         isWeb3Enabled,
         chainId: chainHexId,
-        account: doctorAddress,
+        account: clinicAddress,
     } = useMoralis()
     const { runContractFunction } = useWeb3Contract()
 
-    const [doctorInfo, setDoctorInfo] = useState({})
+    const [clinicInfo, setClinicInfo] = useState({})
     const [isLoading, setIsLoading] = useState(true)
+    const [isRegistered, setIsRegistered] = useState(false)
 
     const chainId = chainHexId ? parseInt(chainHexId).toString() : "31337"
     const patientMedicalRecordSystemAddress =
         networkMapping[chainId]?.PatientMedicalRecordSystem[0]
 
-    const [isRegistered, setIsRegistered] = useState(false)
-
     useEffect(() => {
-        const fetchDoctor = async () => {
-            if (doctorAddress) {
-                await initiateGetDoctorDetailsFunction()
+        const fetchClinic = async () => {
+            if (clinicAddress) {
+                await initiateGetClinicDetailsFunction()
             }
         }
 
-        fetchDoctor().catch((e) => console.log("Error in useEffect", e))
-    }, [doctorAddress])
+        fetchClinic().catch((e) => console.log("Error in useEffect", e))
+    }, [clinicAddress])
 
-
-    const initiateGetDoctorDetailsFunction = async () => {
-        const getDoctorDetailsOptions = {
+    const initiateGetClinicDetailsFunction = async () => {
+        const getClinicDetailsOptions = {
             abi: PatientMedicalRecordSystemAbi,
             contractAddress: patientMedicalRecordSystemAddress,
-            functionName: "getDoctorDetails",
+            functionName: "getClinicDetails",
             params: {
-                _doctorAddress: doctorAddress,
+                _clinicAddress: clinicAddress,
             },
         }
 
-        // Actually calling the function. [This is where the transaction initiation actually begins].
+        // initiating the getClinicDetails function
         await runContractFunction({
-            params: getDoctorDetailsOptions,
+            params: getClinicDetailsOptions,
             onError: (error) => {
                 console.log(
-                    "Error while calling getDoctorDetails function",
+                    "Error while calling getClinicDetails function",
                     error
                 )
             },
             onSuccess: (res) => {
                 setIsLoading(false)
                 if (res[2] == false) {
-                    console.log("Doctor is not registered")
+                    console.log("Clinic is not registered")
                 } else {
-                    console.log("Doctor is registered")
+                    console.log("Clinic is registered")
                     setIsRegistered(true)
 
-                    // setting up the doctorInfo hash
+                    // setting up the clinicInfo hash
                     const ipfsInfoHash = res[1]
                     fetch(
                         process.env.pinata_gateway_url +
@@ -79,7 +77,7 @@ export default function DoctorDashboard() {
                         })
                         .then((data) => {
                             console.log(data)
-                            setDoctorInfo(data)
+                            setClinicInfo(data)
                         })
                         .catch((error) => {
                             console.error("Error fetching IFPS info:", error)
@@ -90,16 +88,19 @@ export default function DoctorDashboard() {
     }
 
     return (
-        <div className="container mx-auto overflow-x-hidden h-screen">
+        <div className="container mx-auto  overflow-x-hidden h-screen">
             <Head>
-                <title>Myriad - Doctor Dashboard</title>
-                <meta name="description" content="Myriad - Doctor Dashboard" />
+                <title>Myriad - Clinic Dashboard</title>
+                <meta
+                    name="description"
+                    content="Myriad - Clinic Dashboard"
+                />
                 <link rel="icon" href="/logo.svg" />
             </Head>
             <Header />
             <div className="container">
                 <div className="py-4 px-3 font-bold text-4xl ml-12">
-                    Doctor Dashboard
+                    Clinic Dashboard
                     {isWeb3Enabled ? (
                         <div className="badge badge-primary ml-4">
                             Web3 is Enabled
@@ -135,13 +136,13 @@ export default function DoctorDashboard() {
                                 />
                             </div>
                         ) : isRegistered ? (
-                            <DoctorProfile doctorInfo={doctorInfo} />
+                            <ClinicProfile clinicInfo={clinicInfo} />
                         ) : (
-                            <NotRegistered name="Doctor" />
+                            <NotRegistered name="Clinic" />
                         )
                     ) : (
                         <div>
-                            <DoctorWorkflow />
+                            <ClinicWorkflow />
                         </div>
                     )}
                 </div>
@@ -149,8 +150,3 @@ export default function DoctorDashboard() {
         </div>
     )
 }
-
-/* 1. registered doctors can view their details. 
-                        
-2. Registered doctors can add diagnostic tests and diagnosis details in a particular patient's record. For this Add a Button which opens a modal form.
-*/
