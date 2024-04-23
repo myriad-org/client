@@ -82,7 +82,7 @@ export default function Home() {
                             Features
                         </h2>
                         <h3 className="max-w-2xl px-5 mt-2 text-3xl font-black leading-tight text-center text-gray-900 sm:mt-0 sm:px-0 sm:text-6xl">
-                            Built and Designed with patients ease and privacy in
+                            Built and Designed with community's ease and privacy in
                             Mind
                         </h3>
                         <div className="flex flex-col w-full mt-0 lg:flex-row sm:mt-10 lg:mt-20">

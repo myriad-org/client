@@ -195,14 +195,14 @@ export default function AdminDashboard() {
     }
 
     return (
-        <div className="container mx-auto h-screen overflow-x-hidden">
+        <div className="mx-auto h-screen overflow-x-hidden">
             <Head>
                 <title>Myriad - Admin Dashboard</title>
                 <meta name="description" content="Myriad - Admin Dashboard" />
                 <link rel="icon" href="/logo.svg" />
             </Head>
             <Header />
-            <div className="container">
+            <div className="container mx-auto">
                 <div>
                     <Modal
                         isVisible={showAddDoctorModal}

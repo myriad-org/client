@@ -1,8 +1,7 @@
 import Link from "next/link"
 
 export default function Header() {
-    const DAOURI =
-        process.env.NEXT_PUBLIC_DAOURI
+    const DAOURI = process.env.NEXT_PUBLIC_DAOURI
 
     return (
         <header className="relative z-0 w-full h-24 shadow-sm">
@@ -55,8 +54,11 @@ export default function Header() {
                     </Link>
 
                     <div className="flex flex-col block w-full font-medium border-t border-gray-200 md:hidden">
-                        <Link href="{DAOURI}" >
-                            <a target={`_blank`} className="relative inline-block w-full px-5 py-3 text-sm leading-none text-center text-white bg-indigo-700 fold-bold">
+                        <Link href="{DAOURI}">
+                            <a
+                                target={`_blank`}
+                                className="relative inline-block w-full px-5 py-3 text-sm leading-none text-center text-white bg-indigo-700 fold-bold"
+                            >
                                 Governance
                             </a>
                         </Link>
@@ -64,8 +66,11 @@ export default function Header() {
                 </nav>
 
                 <div className=" absolute left-0 flex-col items-center justify-center hidden w-full pb-8 mt-48 border-b border-gray-200 md:relative md:w-auto md:bg-transparent md:border-none md:mt-0 md:flex-row md:p-0 md:items-end md:flex md:justify-between">
-                    <Link href={DAOURI} >
-                        <a target={`_blank`} className="relative z-40 inline-block w-auto h-full px-5 py-3 text-sm font-bold leading-none text-white transition-all transition duration-100 duration-300 bg-indigo-700 rounded-lg shadow-md fold-bold lg:bg-white lg:text-indigo-700 sm:w-full lg:shadow-none hover:shadow-xl">
+                    <Link href={DAOURI}>
+                        <a
+                            target={`_blank`}
+                            className="relative z-40 inline-block w-auto h-full px-5 py-3 text-sm font-bold leading-none text-white transition-all transition duration-100 duration-300 bg-indigo-700 rounded-lg shadow-md fold-bold lg:bg-white lg:text-indigo-700 sm:w-full lg:shadow-none hover:shadow-xl"
+                        >
                             Governance
                         </a>
                     </Link>

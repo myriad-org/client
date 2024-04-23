@@ -88,7 +88,7 @@ export default function HospitalDashboard() {
     }
 
     return (
-        <div className="container mx-auto  overflow-x-hidden h-screen">
+        <div className="mx-auto  overflow-x-hidden h-screen">
             <Head>
                 <title>Myriad - Hospital Dashboard</title>
                 <meta
@@ -98,7 +98,7 @@ export default function HospitalDashboard() {
                 <link rel="icon" href="/logo.svg" />
             </Head>
             <Header />
-            <div className="container">
+            <div className="container mx-auto">
                 <div className="py-4 px-3 font-bold text-4xl ml-12">
                     Hospital Dashboard
                     {isWeb3Enabled ? (

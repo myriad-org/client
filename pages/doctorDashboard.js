@@ -89,14 +89,14 @@ export default function DoctorDashboard() {
     }
 
     return (
-        <div className="container mx-auto overflow-x-hidden h-screen">
+        <div className="mx-auto overflow-x-hidden h-screen">
             <Head>
                 <title>Myriad - Doctor Dashboard</title>
                 <meta name="description" content="Myriad - Doctor Dashboard" />
                 <link rel="icon" href="/logo.svg" />
             </Head>
             <Header />
-            <div className="container">
+            <div className="container mx-auto">
                 <div className="py-4 px-3 font-bold text-4xl ml-12">
                     Doctor Dashboard
                     {isWeb3Enabled ? (
