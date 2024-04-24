@@ -73,7 +73,7 @@ export default function RegisterPatientModal({ isVisible, onClose, account }) {
             },
             body: data,
         }
-        
+
         try {
             const res = await fetch(pinataPinUrl, req)
             console.log(req, res)
@@ -116,7 +116,7 @@ export default function RegisterPatientModal({ isVisible, onClose, account }) {
             chronicHash: new Array(),
             accidentHash: new Array(),
         }
-        
+
         // uploading the patient metadata to IPFS
         const ipfsInfoHash = await uploadInfoToIpfs(patientMetadata)
 
@@ -145,38 +145,70 @@ export default function RegisterPatientModal({ isVisible, onClose, account }) {
         })
     }
 
+    // const downloadPrivateKey = async () => {
+    //     const element = document.createElement("a")
+    //     const file = await new Blob(
+    //         [
+    //             privateKey ||
+    //                 "Failed to Generate Private Key... Please cancel the Patient Registration...",
+    //         ],
+    //         {
+    //             type: "text/plain",
+    //         }
+    //     )
+    //     element.href = URL.createObjectURL(file)
+    //     element.download = `privateKey-${account}.txt`
+    //     document.body.appendChild(element)
+    //     element.click()
+    // }
+    // const downloadPublicKey = async () => {
+    //     const element = document.createElement("a")
+    //     const file = await new Blob(
+    //         [
+    //             publicKey ||
+    //                 "Failed to Generate Public Key... Please cancel the Patient Registration...",
+    //         ],
+    //         {
+    //             type: "text/plain",
+    //         }
+    //     )
+    //     element.href = URL.createObjectURL(file)
+    //     element.download = `publicKey-${account}.txt`
+    //     document.body.appendChild(element)
+    //     element.click()
+    // }
     const downloadPrivateKey = async () => {
-        const element = document.createElement("a")
-        const file = await new Blob(
-            [
-                privateKey ||
-                    "Failed to Generate Private Key... Please cancel the Patient Registration...",
-            ],
-            {
-                type: "text/plain",
-            }
-        )
-        element.href = URL.createObjectURL(file)
-        element.download = "privateKey.txt"
-        document.body.appendChild(element)
-        element.click()
+        try {
+            const handle = await window.showDirectoryPicker();
+            await saveKeyToFileSystem(privateKey, handle, `privateKey-${account}.pem`);
+        } catch (error) {
+            console.error("Error saving private key:", error);
+        }
     }
+
     const downloadPublicKey = async () => {
-        const element = document.createElement("a")
-        const file = await new Blob(
-            [
-                publicKey ||
-                    "Failed to Generate Public Key... Please cancel the Patient Registration...",
-            ],
-            {
-                type: "text/plain",
-            }
-        )
-        element.href = URL.createObjectURL(file)
-        element.download = "publicKey.txt"
-        document.body.appendChild(element)
-        element.click()
+        try {
+            const handle = await window.showDirectoryPicker();
+            await saveKeyToFileSystem(publicKey, handle, `publicKey-${account}.pem`);
+        } catch (error) {
+            console.error("Error saving private or public key:", error);
+        }
     }
+    
+    const saveKeyToFileSystem = async (key, directoryHandle, filename) => {
+        if (!key) {
+            throw new Error("Key is empty or undefined.");
+        }
+        
+        const keyString = JSON.stringify(key); // Convert key to string if necessary
+        
+        const fileHandle = await directoryHandle.getFileHandle(filename, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(keyString);
+        await writable.close();
+        console.log(`Key "${filename}" saved successfully.`);
+    }
+    
 
     return (
         <div>

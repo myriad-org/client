@@ -39,7 +39,10 @@ export default function PatientProfile({ patientInfo }) {
         console.log("Acute Hash: ", patientInfo?.acuteHash)
     }, [patientInfo])
 
-    const handleClick = () => {
+    const handleClickFetchPrivateKey = () => {
+        fetchPrivateKey().catch((error) => {
+            console.error("Error fetching private key:", error)
+        })
         setShowModal(true)
     }
 
@@ -60,9 +63,11 @@ export default function PatientProfile({ patientInfo }) {
     const [decryptedAccidentHash, setDecryptedAccidentHash] = useState([])
     const [decryptedAcuteHash, setDecryptedAcuteHash] = useState([])
 
-    const handleOkPressed = () => {
+    const handleOkPressed = async () => {
         //decrypting the IPFS hashes and storing decrypted IPFS file metadatas in the same array
         // console.log("Encrypted vaccinationHash popo:", vaccinationHash)
+        console.log("Fetching the private key")
+
         try {
             haveVaccinationFile &&
                 setDecryptedVaccinationHash(
@@ -90,7 +95,6 @@ export default function PatientProfile({ patientInfo }) {
                         return decryptHash(encryptedHash)
                     })
                 )
-
         } catch (e) {
             console.log("Error while trying to decrypt: ", e)
             setIsCorrectlyDecrypted(false)
@@ -154,6 +158,35 @@ export default function PatientProfile({ patientInfo }) {
         })
     }
 
+    // Read the private key from ~/.myriad-secrets/privateKey-{account}.pem
+    // file stored at the time of registration
+    // Function to fetch the private key from the file system
+    async function fetchPrivateKey() {
+        try {
+            if (!patientInfo || !patientInfo.account) {
+                console.error("Patient information incomplete.")
+                return
+            }
+    
+            // Request access to the file system
+            const directoryHandle = await window.showDirectoryPicker()
+    
+            // Access the privateKey file
+            const fileHandle = await directoryHandle.getFileHandle(
+                `privateKey-${patientInfo.account.toLowerCase()}.pem`
+            )
+    
+            // Read the content of the privateKey file
+            const privateKeyContent = await readFileContent(fileHandle)
+    
+            // Set the private key to the state
+            setPrivateKey(privateKeyContent)
+        } catch (error) {
+            console.error("Error fetching private key:", error)
+        }
+    }
+    
+
     return (
         <div>
             <div>
@@ -169,7 +202,7 @@ export default function PatientProfile({ patientInfo }) {
                             setShowModal(false)
                         }}
                         onOk={handleOkPressed}
-                        isOkDisabled={!Boolean(privateKey)}
+                        // isOkDisabled={!Boolean(privateKey)}
                     >
                         <div className="mt-b mb-8">
                             <div className="mb-5 mt-3">
@@ -179,21 +212,22 @@ export default function PatientProfile({ patientInfo }) {
                                 Copy-Paste your Private Key from the text file
                                 downloaded while registering to the system. We
                                 will not store it and only use to decrypt the
-                                IPFS hashes locally.
+                                IPFS hashes locally. - trying to read file
+                                automatically.
                             </div>
 
-                            <input
+                            {/* <input
                                 type="file"
                                 id="fileInput"
                                 accept=".txt"
-                                required
+                                // required
                                 onChange={async (event) => {
                                     const privateKey = await readFileContent(
                                         event.target.files[0]
                                     )
                                     setPrivateKey(privateKey)
                                 }}
-                            />
+                            /> */}
                         </div>
                     </Modal>
                 </div>
@@ -202,7 +236,7 @@ export default function PatientProfile({ patientInfo }) {
                         <div className="mb-1">
                             <span>
                                 <span className="font-sans md:text-xl font-medium hover:underline">
-                                    Name: {" "}
+                                    Name:{" "}
                                 </span>
                                 <span className="font-serif md:text-xl font-normal">
                                     {patientInfo?.name}
@@ -244,9 +278,7 @@ export default function PatientProfile({ patientInfo }) {
                             </span>
                             :{" "}
                             <a className="badge badge-accent ml-3 md:p-2 px-4">
-                                {timestampToDate(
-                                    patientInfo?.timestamp
-                                )}
+                                {timestampToDate(patientInfo?.timestamp)}
                             </a>
                         </div>
                         {/* <div>
@@ -265,7 +297,7 @@ export default function PatientProfile({ patientInfo }) {
                         <div className="text-center">
                             <button
                                 className="btn btn-primary btn-md mt-8"
-                                onClick={handleClick}
+                                onClick={handleClickFetchPrivateKey}
                             >
                                 View Medical Files
                             </button>
