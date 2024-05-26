@@ -6,7 +6,7 @@ export default function Header() {
     return (
         <header className="relative z-0 w-full h-24 shadow-sm">
             <div className="container flex items-center justify-center h-full max-w-6xl px-8 mx-auto sm:justify-between xl:px-0">
-                <Link href="/">
+                <Link href="/" legacyBehavior>
                     <a className="relative flex items-center inline-block h-5 h-full font-black leading-none">
                         {/* We have a SVG here */}
                         <img src="/logo.svg" alt="Logo of Myriad" />
@@ -26,35 +26,35 @@ export default function Header() {
                             Home
                         </a>
                     </Link> */}
-                    <Link href="/patientDashboard">
+                    <Link href="/patientDashboard" legacyBehavior>
                         <a className="mr-0 font-bold duration-100 md:mr-3 lg:mr-8 transition-color hover:text-indigo-600">
                             Patient
                         </a>
                     </Link>
-                    <Link href="/doctorDashboard">
+                    <Link href="/doctorDashboard" legacyBehavior>
                         <a className="mr-0 font-bold duration-100 md:mr-3 lg:mr-8 transition-color hover:text-indigo-600">
                             Doctor
                         </a>
                     </Link>
-                    <Link href="/hospitalDashboard">
+                    <Link href="/hospitalDashboard" legacyBehavior>
                         <a className="mr-0 font-bold duration-100 md:mr-3 lg:mr-8 transition-color hover:text-indigo-600">
                             Hospital
                         </a>
                     </Link>
 
-                    <Link href="/clinicDashboard">
+                    <Link href="/clinicDashboard" legacyBehavior>
                         <a className="mr-0 font-bold duration-100 md:mr-3 lg:mr-8 transition-color hover:text-indigo-600">
                             Clinic
                         </a>
                     </Link>
-                    <Link href="/diagnosticLabDashboard">
+                    <Link href="/diagnosticLabDashboard" legacyBehavior>
                         <a className="mr-0 font-bold duration-100 md:mr-3 lg:mr-8 transition-color hover:text-indigo-600">
                             Lab
                         </a>
                     </Link>
 
                     <div className="flex flex-col block w-full font-medium border-t border-gray-200 md:hidden">
-                        <Link href="{DAOURI}">
+                        <Link href="{DAOURI}" legacyBehavior>
                             <a
                                 target={`_blank`}
                                 className="relative inline-block w-full px-5 py-3 text-sm leading-none text-center text-white bg-indigo-700 fold-bold"
@@ -66,7 +66,7 @@ export default function Header() {
                 </nav>
 
                 <div className=" absolute left-0 flex-col items-center justify-center hidden w-full pb-8 mt-48 border-b border-gray-200 md:relative md:w-auto md:bg-transparent md:border-none md:mt-0 md:flex-row md:p-0 md:items-end md:flex md:justify-between">
-                    <Link href={DAOURI}>
+                    <Link href={DAOURI} legacyBehavior>
                         <a
                             target={`_blank`}
                             className="relative z-40 inline-block w-auto h-full px-5 py-3 text-sm font-bold leading-none text-white transition-all transition duration-100 duration-300 bg-indigo-700 rounded-lg shadow-md fold-bold lg:bg-white lg:text-indigo-700 sm:w-full lg:shadow-none hover:shadow-xl"

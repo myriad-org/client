@@ -30,32 +30,32 @@ export default function Home() {
                                 cryptography.
                             </p>
                             <button className="btn btn-primary md:btn-md btn-sm text-center">
-                                <Link href="/patientDashboard">
+                                <Link href="/patientDashboard" legacyBehavior>
                                     <a>Patient</a>
                                 </Link>
                             </button>
                             <button className="btn btn-primary md:btn-base btn-sm md:hidden mt-4 md:mt-0">
-                                <Link href="/doctorDashboard">
+                                <Link href="/doctorDashboard" legacyBehavior>
                                     <a>Doctor Login</a>
                                 </Link>
                             </button>
                             <button className="btn btn-primary md:btn-base btn-sm md:hidden mt-4 md:mt-0">
-                                <Link href="/hospitalDashboard">
+                                <Link href="/hospitalDashboard" legacyBehavior>
                                     <a>Hospital Login</a>
                                 </Link>
                             </button>
                             <button className="btn btn-primary md:btn-base btn-sm md:hidden mt-4 md:mt-0">
-                                <Link href="/clinicDashboard">
+                                <Link href="/clinicDashboard" legacyBehavior>
                                     <a>Clinic Login</a>
                                 </Link>
                             </button>
                             <button className="btn btn-primary md:btn-base btn-sm md:hidden mt-4 md:mt-0">
-                                <Link href="/diagnosticLabDashboard">
+                                <Link href="/diagnosticLabDashboard" legacyBehavior>
                                     <a>Diagnostic Lab Login</a>
                                 </Link>
                             </button>
                             <button className="btn btn-primary md:btn-base btn-sm md:hidden mt-4 md:mt-0">
-                                <Link href="/AdminDashboard">
+                                <Link href="/AdminDashboard" legacyBehavior>
                                     <a>Admin Login</a>
                                 </Link>
                             </button>
