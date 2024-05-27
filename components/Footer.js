@@ -168,7 +168,7 @@ export default function Footer() {
 
                 <div className="pt-2 pt-4 mt-2 text-center text-gray-600 border-t border-gray-100">
                     Developed by{" "}
-                    <a href="https://saditya9211.me">Aditya Singh</a>
+                    <a href="https://adityas.net">Aditya Singh</a>
                 </div>
             </footer>
         </div>
